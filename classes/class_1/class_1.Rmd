@@ -109,7 +109,7 @@ popList <- MoBPS::creating.diploid(nindi =  100,
                                    nsnp = 1000,
                                    trait.name = 'MKG',
                                    n.additive = 100,
-                                   var.additive.l = rep(c(1,5),50)) # change to single number when patched
+                                   var.additive.l = rep(3,100)) # change to single number when patched
 hist(popList$info$real.bv.add[[1]][,5],
      freq = FALSE, main = '', xlab = 'additive effect')
 lines(density(popList$info$real.bv.add[[1]][,5]))
@@ -130,6 +130,30 @@ plot(popList$info$real.bv.add[[1]][,1],
 
 
 ## Breeding Actions
+
+
+```{r}
+popList <- MoBPS::creating.diploid(nindi =  100,
+                                   nsnp = 1000,
+                                   trait.name = 'MKG',
+                                   n.additive = 100,
+                                   var.additive.l = rep(3,100)) # change to single number when patched
+popList <- MoBPS::breeding.diploid(popList,
+                                   breeding.size = 100)
+summary(popList)
+```
+
+
+```{r}
+popList <- MoBPS::breeding.diploid(popList,
+                                   breeding.size = 100,
+                                   selection.m.gen = 2,
+                                   selection.f.gen = 2,
+                                   selection.criteria = 'bv',
+                                   selection.size = c(10,50))
+summary(popList)
+```
+
 
 
 ## The population list object
