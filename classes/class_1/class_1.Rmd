@@ -1,0 +1,110 @@
+---
+title: "Class 1"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Prerequisites
+
+Install needed packages
+
+```{r install_packages, echo=TRUE, exercise=FALSE}
+pck <- c('devtools','stringr')
+install.packages(pck[!pck %in% rownames(installed.packages())])
+invisible(lapply(pck,library,character.only = TRUE, quietly = TRUE))
+```
+
+Install working RandomFieldsUtils and Miraculix versions
+
+```{r install_dependencies, eval=FALSE, exercise=FALSE, include=TRUE}
+pck <- character(2)
+temp <- readLines('https://github.com/tpook92/MoBPS')
+pck[1] <- str_extract(grep('RandomFieldsUtils_[0-9.]+tar.gz',temp, value = TRUE),
+                      'RandomFieldsUtils_[0-9.]+tar.gz')[[1]]
+pck[2] <- str_extract(grep('miraculix_[0-9.]+tar.gz', temp, value = TRUE),
+                      'miraculix_[0-9.]+tar.gz')[[1]]
+pck <- paste0('https://github.com/tpook92/MoBPS/raw/master/', pck)
+install.packages(pck, repos = NULL, type = 'source')
+
+
+```
+
+
+Install MoBPS
+
+```{r install_MoBPS, echo=TRUE, exercise=FALSE}
+devtools::install_github('tpook92/MoBPS/pkg')
+library(MoBPS)
+```
+
+## Creation of a base population
+
+MoBPS is based on the assumption that every breeding program can be modelled by defining ....
+
+We will start by simulating a population of 10 individuals and 100 SNPs. The basic function to do so is `MoBPS::creating.diploid()`, which creates the initial population list of founder animals. There also exists a tailored `summary()` function, printing the most necessary information. 
+
+```{r show_base_creation, echo=TRUE}
+popList <- MoBPS::creating.diploid(nindi = 10,
+                                   nsnp = 100)
+summary(popList)
+```
+
+As you noticed, MoBPS automatically divided the population into 50% male and 50% female individuals and assigned them to seperate cohorts. So the population consists of two cohorts.
+
+If you want to specify which individuals you want to add, use the parameter `sex.s` instead of `nindi`. It needs a vector of `1` (male) and `2` (female). So following code creates the same population as before, just all individuals being male. 
+
+```{r show_base_creation_2, echo=TRUE}
+popList <- MoBPS::creating.diploid(sex.s = rep(1,10),
+                                   nsnp = 100)
+summary(popList)
+```
+
+
+### exercise 1
+Now it's your turn. Create a base population `basePop` of 10 males, 50 females and 1000 SNPs.
+
+```{r creation, exercise=TRUE, exercise.lines = 5}
+# Create a base population basePop of 10 males, 50 females and 1000 SNPs
+
+```
+
+
+```{r creation-solution}
+basePop <- MoBPS::creating.diploid(sex.s = c(rep(1,10), rep(2,50)),
+                                   nsnp = 1000)
+summary(basePop)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+<div id="creation-hint">
+**Hint:** Use `rep()`to repeat values and combine them into one vector by `c()`.
+</div>
+
+```
+
+
+```{r show_popList1, echo=TRUE}
+str(popList, max.level = 1)
+```
+
+```{r show_popList2, echo=TRUE}
+popList$info
+```
+
+```{r show_popList3, echo=TRUE}
+popList$breeding
+```
+
+
+
+```{r}
+popList <- breeding.diploid(popList)
+str(popList$info)
+```
+
