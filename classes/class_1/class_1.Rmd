@@ -1,6 +1,8 @@
 ---
-title: "Class 1"
-output: learnr::tutorial
+title: "Class 1 - basic functionality"
+output: 
+  learnr::tutorial:
+    highlight: tango
 runtime: shiny_prerendered
 ---
 
@@ -46,6 +48,8 @@ library(MoBPS)
 
 MoBPS is based on the assumption that every breeding program can be modelled by defining ....
 
+### Base population without phenotype
+
 We will start by simulating a population of 10 individuals and 100 SNPs. The basic function to do so is `MoBPS::creating.diploid()`, which creates the initial population list of founder animals. There also exists a tailored `summary()` function, printing the most necessary information. 
 
 ```{r show_base_creation, echo=TRUE}
@@ -81,13 +85,54 @@ summary(basePop)
 ```
 
 
-```{r eval=FALSE, include=FALSE}
-<div id="creation-hint">
-**Hint:** Use `rep()`to repeat values and combine them into one vector by `c()`.
-</div>
+### Base Population with trait
+
+```{r}
+popList <- MoBPS::creating.diploid(nindi =  100,
+                                   nsnp = 1000,
+                                   trait.name = 'MKG',
+                                   n.additive = 100)
+summary(popList)
+hist(popList$info$real.bv.add[[1]][,5],
+     freq = FALSE, main = '', xlab = 'additive effect')
+lines(density(popList$info$real.bv.add[[1]][,5]))
+lines(seq(-3,3,0.01), dnorm(seq(-3,3,0.01)), col = 'red')
+legend('topright',
+       legend = c('simulated', 'standard normal'),
+       col = c('black', 'red'),
+       lty = 1)
+```
+
+
+```{r}
+popList <- MoBPS::creating.diploid(nindi =  100,
+                                   nsnp = 1000,
+                                   trait.name = 'MKG',
+                                   n.additive = 100,
+                                   var.additive.l = rep(c(1,5),50)) # change to single number when patched
+hist(popList$info$real.bv.add[[1]][,5],
+     freq = FALSE, main = '', xlab = 'additive effect')
+lines(density(popList$info$real.bv.add[[1]][,5]))
+lines(seq(-5,5,0.01), dnorm(seq(-5,5,0.01)), col = 'red')
+legend('topright',
+       legend = c('simulated', 'standard normal'),
+       col = c('black', 'red'),
+       lty = 1)
+```
+
+
+```{r}
+plot(popList$info$real.bv.add[[1]][,1],
+     abs(popList$info$real.bv.add[[1]][,5]),
+     main = '', xlab = 'position', ylab = 'absolute effect size')
 
 ```
 
+
+## Breeding Actions
+
+
+## The population list object
 
 ```{r show_popList1, echo=TRUE}
 str(popList, max.level = 1)
@@ -108,3 +153,5 @@ popList <- breeding.diploid(popList)
 str(popList$info)
 ```
 
+
+## Evaluating results
