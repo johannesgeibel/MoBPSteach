@@ -129,6 +129,26 @@ plot(popList$info$real.bv.add[[1]][,1],
 ```
 
 
+### Adding second trait
+
+```{r}
+popList <- MoBPS::creating.diploid(nindi =  100,
+                                   nsnp = 1000,
+                                   trait.name = 'MKG',
+                                   n.additive = 100,
+                                   var.additive.l = rep(3,100)) # change to single number when patched
+
+popList <- creating.trait(population = popList,
+                          trait.name = c('MKG','FP'), # Bug when adding second trait also needs first trait name
+                          n.additive = 200,
+                          new.phenotype.correlation = matrix(c(1,0.5,0.5,1),2,2),
+                          new.breeding.correlation = matrix(c(1,0.5,0.5,1),2,2))
+summary(popList)
+str(popList$info,max.level = 2)
+```
+
+
+
 ## Breeding Actions
 
 
