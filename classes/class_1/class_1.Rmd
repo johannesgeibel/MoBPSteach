@@ -141,10 +141,49 @@ popList <- MoBPS::creating.diploid(nindi =  100,
 popList <- creating.trait(population = popList,
                           trait.name = c('MKG','FP'), # Bug when adding second trait also needs first trait name
                           n.additive = 200,
-                          new.phenotype.correlation = matrix(c(1,0.5,0.5,1),2,2),
-                          new.breeding.correlation = matrix(c(1,0.5,0.5,1),2,2))
+                          new.phenotype.correlation = matrix(c(1,-.5,-.5,1),2,2),
+                          new.breeding.correlation = matrix(c(1,.5,.5,1),2,2))
 summary(popList)
 str(popList$info,max.level = 2)
+```
+
+Be aware that using a genetic and phenotypic correlation matrix, which result in not defined environemental correlations will throw an error message:
+
+```{r error=TRUE}
+popList <- creating.trait(population = popList,
+                          new.phenotype.correlation = matrix(c(1,-1,-1,1),2,2),
+                          new.breeding.correlation = matrix(c(1,.5,.5,1),2,2))
+```
+
+
+```{r traits, exercise=TRUE, exercise.lines = 5}
+popList <- MoBPS::creating.diploid(nindi =  100,
+                                   nsnp = 1000)
+
+
+```
+
+```{r traits-solution}
+# solution 1 --> create traits after population
+popList <- MoBPS::creating.diploid(nindi =  100,
+                                   nsnp = 1000)
+popList <- MoBPS::creating.trait(population = popList,
+                                 trait.name = c('traitA','traitB'),
+                                 n.additive = c(150,20),
+                                 var.additive.l = list(traitA = 1,traitB = 2),
+                                 new.phenotype.correlation = matrix(c(1,0.5,0.5,1),2,2),
+                                 new.breeding.correlation = matrix(c(1,0.2,0.2,1),2,2))
+summary(popList)
+# solution 2 --> create traits directly
+popList <- MoBPS::creating.diploid(nindi =  100,
+                                   nsnp = 1000,
+                                   trait.name = c('traitA','traitB'),
+                                   n.additive = c(150,20),
+                                   var.additive.l = list(traitA = 1,traitB = 2),
+                                   new.phenotype.correlation = matrix(c(1,0.5,0.5,1),2,2),
+                                   new.breeding.correlation = matrix(c(1,0.2,0.2,1),2,2))
+summary(popList)
+
 ```
 
 
