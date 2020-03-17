@@ -82,6 +82,10 @@ Now it's your turn. Create a base population `basePop` of 10 males, 50 females a
 basePop <- MoBPS::creating.diploid(sex.s = c(rep(1,10), rep(2,50)),
                                    nsnp = 1000)
 summary(basePop)
+
+basePop <- MoBPS::creating.diploid(nindi=60, sex.quota = 50/60,
+                                   nsnp = 1000)
+summary(basePop)
 ```
 
 
@@ -109,7 +113,7 @@ popList <- MoBPS::creating.diploid(nindi =  100,
                                    nsnp = 1000,
                                    trait.name = 'MKG',
                                    n.additive = 100,
-                                   var.additive.l = rep(3,100)) # change to single number when patched
+                                   var.additive.l = 3) 
 hist(popList$info$real.bv.add[[1]][,5],
      freq = FALSE, main = '', xlab = 'additive effect')
 lines(density(popList$info$real.bv.add[[1]][,5]))
@@ -136,18 +140,22 @@ popList <- MoBPS::creating.diploid(nindi =  100,
                                    nsnp = 1000,
                                    trait.name = 'MKG',
                                    n.additive = 100,
-                                   var.additive.l = rep(3,100)) # change to single number when patched
+                                   var.additive.l = 3) 
 
 popList <- creating.trait(population = popList,
-                          trait.name = c('MKG','FP'), # Bug when adding second trait also needs first trait name
+                          trait.name = c('FP'), 
                           n.additive = 200,
                           new.phenotype.correlation = matrix(c(1,-.5,-.5,1),2,2),
-                          new.breeding.correlation = matrix(c(1,.5,.5,1),2,2))
+                          shuffle.traits = c(1,2),
+                          shuffle.cor =  matrix(c(1,.5,.5,1),2,2))
+
+# Correlation between QTL effects is obtained by placing effects on the same markers, leading to MORE underlying QTL than initially generated. This module is many intended for quantitative traits.
+# In case a trait is simulated via no underlying QTL the genetic correlation can be entered via new.breeding.correlation
 summary(popList)
 str(popList$info,max.level = 2)
 ```
 
-Be aware that using a genetic and phenotypic correlation matrix, which result in not defined environemental correlations will throw an error message:
+Be aware that using a genetic and phenotypic correlation matrix, which result in not defined environemental correlations will throw an error message. Note that such a matrix just can not occur in practice even those pair-wise correlation estimations might lead to such estimates:
 
 ```{r error=TRUE}
 popList <- creating.trait(population = popList,
@@ -172,7 +180,8 @@ popList <- MoBPS::creating.trait(population = popList,
                                  n.additive = c(150,20),
                                  var.additive.l = list(traitA = 1,traitB = 2),
                                  new.phenotype.correlation = matrix(c(1,0.5,0.5,1),2,2),
-                                 new.breeding.correlation = matrix(c(1,0.2,0.2,1),2,2))
+                                 shuffle.traits = 1:2,
+                                 shuffle.cor = matrix(c(1,0.2,0.2,1),2,2))
 summary(popList)
 # solution 2 --> create traits directly
 popList <- MoBPS::creating.diploid(nindi =  100,
@@ -181,7 +190,8 @@ popList <- MoBPS::creating.diploid(nindi =  100,
                                    n.additive = c(150,20),
                                    var.additive.l = list(traitA = 1,traitB = 2),
                                    new.phenotype.correlation = matrix(c(1,0.5,0.5,1),2,2),
-                                   new.breeding.correlation = matrix(c(1,0.2,0.2,1),2,2))
+                                   shuffle.traits = 1:2,
+                                   shuffle.cor = matrix(c(1,0.2,0.2,1),2,2))
 summary(popList)
 
 ```
