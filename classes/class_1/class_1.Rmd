@@ -11,6 +11,15 @@ library(learnr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Introduction
+
+The following tutorial will lead you through the basic functionality of the R package MoBPS (Modular Breeding Program Simulator; <a href="https://www.biorxiv.org/content/10.1101/829333v1">www.biorxiv.org/content/10.1101/829333v1</a>) which can be found at <a href="https://github.com/tpook92/MoBPS">GitHub</a>.
+
+If you do not know much about the intension and the general set up of the Simulation program yet, enjoy the presentation of Torsten in the following video.
+
+![](https://youtu.be/uNeuCkWBNtg)
+
+
 ## Prerequisites
 
 Install needed packages
@@ -47,6 +56,10 @@ library(MoBPS)
 ## Creation of a base population
 
 MoBPS is based on the assumption that every breeding program can be modelled by defining ....
+
+The following video will introduce you to the content of this tutorial.
+
+![](https://www.youtube.com/watch?v=xAl51woiU5s)
 
 ### Base population without phenotype
 
