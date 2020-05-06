@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE)
 ```
 
-## Introduction
+## Introduction to MoBPS
 
 The following tutorial will lead you through the basic functionality of the R package MoBPS (Modular Breeding Program Simulator; <a href="https://www.biorxiv.org/content/10.1101/829333v1">www.biorxiv.org/content/10.1101/829333v1</a>) which can be found at <a href="https://github.com/tpook92/MoBPS">GitHub</a>.
 
@@ -57,14 +57,23 @@ devtools::install_github('tpook92/MoBPS/pkg')
 library(MoBPS)
 ```
 
-## Creation of a base population
+## Introduction to the R package
 
 The R package MoBPS is mainly based on two functions: `creating.diploid()` for the creation of random animals and `breeding.diploid()` to mimic breeding actions (e.g. mating and selection of groups). The following video will introduce you to the basic concept, but the content is also captured by this tutorial.  
   
   
 ![](https://www.youtube.com/watch?v=xAl51woiU5s)  
   
+
+The course will therefore teach you how to simulate following breeding program.  
   
+
+```{r echo=FALSE, out.width = "400px", fig.cap="Figure 1: The scheme behind the breeding program which we will simulate in this course."}
+knitr::include_graphics("https://github.com/johannesgeibel/MoBPSteach/raw/master/classes/class_1/breedinProgram.png")
+```
+
+## Creation of a base population
+
 ### Base population without phenotype
 
 We will start by simulating a population of 50 individuals and 500 SNPs. The basic function to do so is `creating.diploid()`, which creates the initial population list of founder animals. There also exists a tailored `summary()` function, printing the most necessary information. 
@@ -300,6 +309,28 @@ tail(get.cohorts(popList, extended = TRUE))
 ```
 
 
+
+```{r burnin, exercise=TRUE, exercise.lines = 12}
+
+
+
+```
+
+
+```{r burnin-solution}
+ownPop <- creating.diploid(nindi = 60,
+                            sex.quota = 0,
+                            nsnp = 500,
+                            chr.nr = 2)
+ownPop <- creating.diploid(population = ownPop,
+                           nindi = 60,
+                           sex.quota = 1,
+                           nsnp = 500,
+                           chr.nr = 2)
+summary(ownPop)
+
+```
+
 ### Selection
 
 The basic principle of breeding is that we do not use all individuals, but only a selected subset for matings. Let's start with random selecting 5 males from the last generation and assining an own cohort name to them.  
@@ -395,6 +426,29 @@ summary(popList)
 
 > Note depending on the size of your population, the number of SNPs and the chosen method, the time needed for breeding value estimation is the big problem of most simulations!
 
+
+```{r breeding, exercise=TRUE, exercise.lines = 12}
+
+
+
+```
+
+
+```{r breeding-solution}
+ownPop <- creating.diploid(nindi = 60,
+                            sex.quota = 0,
+                            nsnp = 500,
+                            chr.nr = 2)
+ownPop <- creating.diploid(population = ownPop,
+                           nindi = 60,
+                           sex.quota = 1,
+                           nsnp = 500,
+                           chr.nr = 2)
+summary(ownPop)
+
+```
+
+
 ## Evaluating results
 
 
@@ -430,3 +484,17 @@ kinship.development(popList,
                     display.cohort.name = TRUE )
 ```
 
+
+```{r res, exercise=TRUE, exercise.lines = 12}
+
+
+
+```
+
+
+```{r res-solution}
+
+
+
+
+```
