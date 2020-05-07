@@ -11,13 +11,14 @@ library(learnr)
 knitr::opts_chunk$set(echo = TRUE,
                       include = TRUE,
                       eval = TRUE)
+set.seed(10)
 ```
 
 ## Introduction to MoBPS
 
 The following tutorial will lead you through the basic functionality of the R package MoBPS (Modular Breeding Program Simulator; <a href="https://www.biorxiv.org/content/10.1101/829333v1">www.biorxiv.org/content/10.1101/829333v1</a>) which can be found at <a href="https://github.com/tpook92/MoBPS">GitHub</a>.
 
-If you do not know much about the intension and the general set up of the Simulation program yet, enjoy the presentation of Torsten in the following video.
+If you do not know much about the intention and the general set up of the Simulation program yet, enjoy the presentation of Torsten in the following video.
 
 ![](https://youtu.be/uNeuCkWBNtg)
 
@@ -84,7 +85,7 @@ popList <- creating.diploid(nindi = 50, # number of individuals
 summary(popList)
 ```
 
-As you noticed, MoBPS automatically divided the population into 50% male and 50% female individuals and assigned them to seperate cohorts (a group of individuals  which share properties at a special timepoint). So the population consists of two cohorts.  
+As you noticed, MoBPS automatically divided the population into 50% male and 50% female individuals and assigned them to separate cohorts (a group of individuals  which share properties at a special time point). So the population consists of two cohorts.  
   
 If you want to change this (e.g. only males or more females than males), add the parameter `sex.quota` which specifies the share of female individuals. So following code creates the same population as before, just all individuals being male. You can additionally name your cohort by the parameter `name.cohort`.
 
@@ -117,7 +118,7 @@ get.cohorts(popList, extended = TRUE)
 ```
 
 
-By now, all markers are located on one single chromosome with a default length of 5 Morgan (M) and a physical size of 5 kilo bases (kb). The number of chromosomes can be eighter changed by the parameter `chr.nr` which leads to the according number of 5M chromosomes, or by directly supplying an vector with the intended legthes in M via `chromosome.length`.
+By now, all markers are located on one single chromosome with a default length of 5 Morgan (M) and a physical size of 5 kilo bases (kb). The number of chromosomes can be either changed by the parameter `chr.nr` which leads to the according number of 5M chromosomes, or by directly supplying an vector with the intended lengths in M via `chromosome.length`.
 
 ```{r}
 temp <- creating.diploid(nindi =  50,
@@ -135,9 +136,16 @@ summary(temp)
 ```
 
 
+It is also possible to create a base population from real data by supplying e.g. a VCF file.
+
+```{r eval=FALSE, include=TRUE}
+creating.diploid(vcf = "/path/to/file.vcf")
+```
 
 
-### exercise 1
+
+
+### Exercise 1
 Now it's your turn. Create a population `ownPop` of 60 males (cohort "founder_male"), 60 females (cohort "founder_female") and 500 SNPs on two chromosomes.
 
 ```{r creation, exercise=TRUE, exercise.lines = 12}
@@ -162,27 +170,21 @@ summary(ownPop)
 ```
 
 
-It is also possible to create a base population from real data by supplying e.g. a VCF file.
-
-```{r eval=FALSE, include=TRUE}
-creating.diploid(vcf = "/path/to/file.vcf")
-```
-
 ## Traits
 ### Adding traits to the base population
 
 By now, our base population consists only of individuals with genomes. To simulate breeding programs, we need to additionally simulate phenotypic traits and the according genetic basis. We will start doing so by randomly drawing additive effects from a normal distribution with additive variance of $\sigma_{A;MKG}^2=25^2kg^2$ for 100 SNP which contribute to the trait milk yield [kg] (MKG) via the function `creating.trait()`. Note that it is also possible to directly simulate the trait in `creating.diploid()`.
 
 ```{r}
-popList <- creating.trait(population = popList,
+temp <- creating.trait(population = popList,
                           # name of trait
                           trait.name = 'MKG',
                           # number of additive effects
                           n.additive = 100,
-                          # additive target variance
-                          var.additive.l = 25^2)
-summary(popList)
-get.cohorts(popList)
+                          # additive genetic target variance
+                          var.target =  25^2)
+summary(temp)
+get.cohorts(temp)
 ```
 
 
@@ -199,20 +201,21 @@ legend('topright',
 ```
 
 
-Adding a second trait can be performed in the same way, but it is necessary to specify residual and genetic correlation. Note that the residual correlation is named phenotype correlation by now. We specify a second trait fat percentage (FP) with additive variance ($r_{A;FP}$) is $4\%^2$. Our additive genetic correlation ($r_{A;MKG;FP}$) to be 0.5 and the environments are assumed to be uncorrelated for now ($r_E=0$).
+It is also possible to use multiple correlated traits. Only additional specification of residual and genetic correlation is needed. Note that the residual correlation is named phenotype correlation by now. We specify a second trait fat percentage (FP) with additive variance ($r_{A;FP}$) is $0.5\%^2$. Our additive genetic correlation ($r_{A;MKG;FP}$) to be 0.5 and the environments are assumed to be uncorrelated for now ($r_E=0$).
 
 ```{r}
 popList <- creating.trait(population = popList,
-                       trait.name = c('FP'), 
-                       n.additive = 200,
-                       var.additive.l = 2^2,
-                       # indices of correlated traits
-                       shuffle.traits = c(1,2),
-                       # genetic correlation (0.5) matrix
-                       shuffle.cor = matrix(c(1,.5,
-                                              .5,1),2,2),
-                       # residual correlation (0) matrix
-                       new.phenotype.correlation = matrix(c(1,0,
+                          trait.name = c('MGK','FP'), 
+                          n.additive = c(100,200),
+                          # target variance
+                          var.target = c(MKG = 25^2, FP = 0.5^2),
+                          # indices of correlated traits
+                          shuffle.traits = c(1,2),
+                          # genetic correlation (0.5) matrix
+                          shuffle.cor = matrix(c(1,.25,
+                                                 .25,1),2,2),
+                          # residual correlation (0) matrix
+                          new.phenotype.correlation = matrix(c(1,0,
                                                             0,1),2,2)
                        )
 summary(popList)
@@ -230,40 +233,55 @@ temp <- creating.trait(population = popList,
                                                             -1,1),2,2))
 ```
 
-### Exercise
+### Exercise 2
 
-```{r traits, exercise=TRUE, exercise.lines = 5}
+Now, coming back to your `ownPop`. Create two traits: "trait_A" shall consist of 150 additive effect SNPs and "trait_B" of 20. Both additive variances (`var.target`) shall be 1 and they shall have a negative additive correlation of -0.2 (`shuffle.cor`). The environments are uncorrelated (`new.phenotype.correlation`).
 
+
+
+```{r include=FALSE}
+
+ownPop1 <- creating.diploid(nindi = 60,
+                            sex.quota = 0,
+                            nsnp = 500,
+                            chr.nr = 2)
+ownPop1 <- creating.diploid(population = ownPop1,
+                           nindi = 60,
+                           sex.quota = 1,
+                           nsnp = 500,
+                           chr.nr = 2)
+
+```
+
+
+```{r traits-setup}
+ownPop <- ownPop1
+```
+
+
+```{r traits, exercise=TRUE, exercise.lines = 12}
 
 
 ```
 
 ```{r traits-solution}
-# solution 1 --> create traits after population
-#popList <- MoBPS::creating.diploid(nindi =  100,
-#                                   nsnp = 1000)
-#popList <- MoBPS::creating.trait(population = popList,
-#                                 trait.name = c('traitA','traitB'),
-#                                 n.additive = c(150,20),
-#                                 var.additive.l = list(traitA = 1,traitB = 2),
-#                                 new.phenotype.correlation = matrix(c(1,0.5,0.5,1),2,2),
-#                                 shuffle.traits = 1:2,
-#                                 shuffle.cor = matrix(c(1,0.2,0.2,1),2,2))
-#summary(popList)
-# solution 2 --> create traits directly
-#popList <- MoBPS::creating.diploid(nindi =  100,
-#                                   nsnp = 1000,
-#                                   trait.name = c('traitA','traitB'),
- #                                  n.additive = c(150,20),
- ##                                  var.additive.l = list(traitA = 1,traitB = 2),
-#                                   new.phenotype.correlation = matrix(c(1,0.5,0.5,1),2,2),
-#                                   shuffle.traits = 1:2,
-#                                   shuffle.cor = matrix(c(1,0.2,0.2,1),2,2))
-#summary(popList)
+ownPop <- creating.trait(population = ownPop,
+                         trait.name = c('trait_A','trait_B'),
+                         n.additive = c(150,20),
+                         var.target = c(trait_A = 1,trait_B = 1),
+                         new.phenotype.correlation = matrix(c(1,0,
+                                                              0,1),
+                                                            2,2),
+                         shuffle.traits = 1:2,
+                         shuffle.cor = matrix(c(1,-0.2,
+                                                -0.2,1),
+                                              2,2))
+summary(ownPop)
+
 
 ```
 
-
+> Note: `summary()` returns the absolute values of correlations - negative values will appear as positive ones.
 
 ## Breeding Actions
 
@@ -288,7 +306,7 @@ get.cohorts(temp, extended = TRUE)
 
 ```
 
-As we do not only want to run it for one burn in generation, but for five, we use a loop to save code lines and additionally use a more usefull cohort name.
+As we do not only want to run it for one burn in generation, but for five, we use a loop to save code lines and additionally use a more useful cohort name.
 
 ```{r}
 n_burnin <- 5
@@ -309,6 +327,33 @@ tail(get.cohorts(popList, extended = TRUE))
 ```
 
 
+### Exercise 3
+
+
+To go on  with your example, produce 3 burnin - generations by random mating of the 60 male and 60 female founders. Name the cohorts as "burnin_" and the according burnin iteration.
+
+
+```{r include=FALSE}
+ownPop2 <- creating.trait(population = ownPop1,
+                         trait.name = c('trait_A','trait_B'),
+                         n.additive = c(150,20),
+                         var.target = c(trait_A = 1,trait_B = 1),
+                         new.phenotype.correlation = matrix(c(1,0,
+                                                              0,1),
+                                                            2,2),
+                         shuffle.traits = 1:2,
+                         shuffle.cor = matrix(c(1,-0.2,
+                                                -0.2,1),
+                                              2,2))
+
+```
+
+
+```{r burnin-setup}
+ownPop <- ownPop2
+```
+
+
 
 ```{r burnin, exercise=TRUE, exercise.lines = 12}
 
@@ -318,22 +363,21 @@ tail(get.cohorts(popList, extended = TRUE))
 
 
 ```{r burnin-solution}
-ownPop <- creating.diploid(nindi = 60,
-                            sex.quota = 0,
-                            nsnp = 500,
-                            chr.nr = 2)
-ownPop <- creating.diploid(population = ownPop,
-                           nindi = 60,
-                           sex.quota = 1,
-                           nsnp = 500,
-                           chr.nr = 2)
+
+n_burnin <- 3
+for(i in 1:n_burnin){
+  ownPop <- breeding.diploid(ownPop,
+                             breeding.size = 120,
+                             name.cohort = paste0('burnin_',i_burnin),
+                             verbose = FALSE)
+}
 summary(ownPop)
 
 ```
 
 ### Selection
 
-The basic principle of breeding is that we do not use all individuals, but only a selected subset for matings. Let's start with random selecting 5 males from the last generation and assining an own cohort name to them.  
+The basic principle of breeding is that we do not use all individuals, but only a selected subset for matings. Let's start with random selecting 5 males from the last generation and assigning an own cohort name to them.  
 
 ```{r eval=FALSE}
 temp <- breeding.diploid(popList,
@@ -352,17 +396,17 @@ tail(get.cohorts(temp,extended = TRUE))
 ```
 
 
-If we do not only want to apply random selection, but selecting the best males based on estimated breeding values (EBV), we need to additionally simulate phenotypes for our individuals. This needs the additional specification of the environemental variances ($\sigma^2_E$) of the traits. Remember Following connenction between heritability ($h^2$), $\sigma^2_A$ and $\sigma^2_E$:
+If we do not only want to apply random selection, but selecting the best males based on estimated breeding values (EBV), we need to additionally simulate phenotypes for our individuals. This needs the additional specification of the environmental variances ($\sigma^2_E$) of the traits. Remember Following connection between heritability ($h^2$), $\sigma^2_A$ and $\sigma^2_E$:
  
 $$h^2=\frac{\sigma^2_A}{\sigma^2_A + \sigma^2_E}$$
 
 $$\sigma^2_E=\frac{\sigma^2_A}{h^2} - \sigma^2_A = \frac{\sigma^2_A (1-h^2)}{h^2}$$
 
-If we assume heritabilities of 0.8 respectively 0.3 for both of our traits, $\sigma^2_{E;MKG}=156.25$ and $\sigma^2_{E;FP}=9.33$. As only female cows can give milk, we simulate the phenotypes for all not yet phenotyped females by the following code. Note that you have to set `sigma.e` only once, if you do not assume changes over the generations!
+If we assume heritabilities of 0.8 respectively 0.3 for both of our traits, $\sigma^2_{E;MKG}=156.25$ and $\sigma^2_{E;FP}=0.58$. As only female cows can give milk, we simulate the phenotypes for all not yet phenotyped females by the following code. Note that you have to set `sigma.e` only once, if you do not assume changes over the generations!
 
 ```{r eval=FALSE, include=FALSE}
 (25^2*(1-0.8))/0.8
-(2^2*(1-0.3))/0.3
+(0.5^2*(1-0.3))/0.3
 
 ```
 
@@ -370,13 +414,13 @@ If we assume heritabilities of 0.8 respectively 0.3 for both of our traits, $\si
 ```{r phenotyping}
 popList <- breeding.diploid(popList,
                             new.bv.observation = "non_obs_f",
-                            sigma.e = c(156.25, 9.33)) # heritability = c(0.8,0.3) 
+                            sigma.e = c(156.25, 0.58)) # heritability = c(0.8,0.3) ; var.a = c(25^5,0.5^2)
 ```
 
 
-We do now select 10 out of 50 males from the last cohort. Breeding values for the males are estimated from female phenotypes via genomic breeding value estimation (default).
+Following code selects 10 out of 50 males from the last cohort. Breeding values for the males are estimated from female phenotypes via genomic breeding value estimation (default).
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 temp <- breeding.diploid(popList,
                          selection.size = 10,
                          # selection based on EBVs
@@ -396,11 +440,12 @@ summary(temp)
 ```
 
 
-### mating and selection
+### Mating and selection
 
 Of course, we want to use these selected males as sires for a new generation. To do so, we can perform selection and mating at once and again use a loop to repeat this process for a number of generations:
 
 ```{r eval=TRUE}
+n_burnin <- 5
 n_selection <- 5 # number of selecting generations
 for(i_selection in 1:n_selection){
   popList <- breeding.diploid(popList,
@@ -427,6 +472,31 @@ summary(popList)
 > Note depending on the size of your population, the number of SNPs and the chosen method, the time needed for breeding value estimation is the big problem of most simulations!
 
 
+### Exercise 4
+
+Do now run 6 generations of a breeding cycle on your 'ownPop'. Select the best 10% of the sires and 50% of the dams, based on  genomic breeding values (`selection.criteria = 'bve', bve = TRUE`) which were estimated from Phenotypes of all previously existing females. Set `sigma.e` in a way that "trait_A" has $h^2=0.666$ and "trait_B" $h^2=0.333$.
+
+
+```{r include=FALSE}
+ownPop3 <- ownPop2
+n_burnin <- 3
+for(i in 1:n_burnin){
+  ownPop3 <- breeding.diploid(ownPop3,
+                              breeding.size = 120,
+                              name.cohort = paste0('burnin_',i_burnin),
+                              verbose = FALSE)
+}
+
+```
+
+
+```{r breeding-setup}
+n_burnin <- 3
+ownPop <- ownPop3
+```
+
+
+
 ```{r breeding, exercise=TRUE, exercise.lines = 12}
 
 
@@ -435,15 +505,26 @@ summary(popList)
 
 
 ```{r breeding-solution}
-ownPop <- creating.diploid(nindi = 60,
-                            sex.quota = 0,
-                            nsnp = 500,
-                            chr.nr = 2)
-ownPop <- creating.diploid(population = ownPop,
-                           nindi = 60,
-                           sex.quota = 1,
-                           nsnp = 500,
-                           chr.nr = 2)
+n_selection <- 6 # number of selecting generations
+for(i_selection in 1:n_selection){
+  ownPop <- breeding.diploid(ownPop,
+                             # create 120 offfspring each year
+                             breeding.size = 120,
+                             # select 6 sires (10%) and 30 dams (50%)
+                             selection.size = c(6,30),
+                             # select based on EBVs
+                             selection.criteria = 'bve',
+                             # estimate breeding values
+                             bve = TRUE,
+                             # use all previous generations 
+                             bve.gen = c(1:(n_burnin + i_selection)),
+                             # add phenotypes for new females, if not yet present
+                             new.bv.observation = "non_obs_f",
+                             # if you did not set up the phenotypes previously remember sigma.e
+                             sigma.e = c(0.5,2),
+                             name.cohort = paste0('offspring_',i_selection),
+                             verbose = FALSE)
+}
 summary(ownPop)
 
 ```
@@ -451,38 +532,90 @@ summary(ownPop)
 
 ## Evaluating results
 
+`MoBPS` contains some utility functions which directly produce simple plots or extract information from a population list object. You already know about `summary` and `get.cohorts`, which you can use to keep track on the simulation. In post simulation evaluation, you are most likely interested in the development of the true breeding values over time. This can be achieved via `bv.development()`.
 
 ```{r eval=TRUE}
 bv.development(population = popList,
-               gen = 1:11,
-               development = 1,
+               gen = 1:11, # generations
+               development = 1, # plot only true breeding values
                display.cohort.name = TRUE)
 ```
 
+> Note that by default 100 is added to the breeding values.  
+  
+As the average breeding value of MKG reaches more than 150, we realize a breeding gain of > 50 kg milk which is $> 2\sigma_{A;MKG}$. For FP, we reach less than 1% which is $< 2\sigma_{A;FP}$.  
+  
+We can also use boxplots via `bv.development.box()` either by generation or for selected cohorts. We additionally suppress the return value of this function by `invisible()`.
 
+```{r}
+invisible(bv.development.box(popList,
+                             gen = 1:11))
 
-```{r eval=TRUE}
-summary(popList)
+invisible(bv.development.box(popList,
+                             cohorts = get.cohorts(popList)))
 
-#get.geno(popList,cohorts = 'founder_male')
-
-#MoBPS::bv.development(popList,
-#                      gen=1:26,
-#                      cohorts = c('offspring_M'))
-invisible(MoBPS::bv.development.box(popList,
-                      gen = 1:11))
-invisible(MoBPS::bv.development.box(popList,
-                      cohorts = get.cohorts(popList)))
-
-MoBPS::analyze.bv(popList,
-                  cohorts = 'burnin_5_M')
-MoBPS::analyze.bv(popList,
-                  cohorts = 'offspring_4_M')
-
-kinship.development(popList,
-                    gen=1:11,
-                    display.cohort.name = TRUE )
 ```
+
+The accuracy of the breeding value estimation for a cohort ($r_{BV;EBV}$) and the according variances will be returned by `analyze.bv()`. The first list elements shows the correlations and the second one the additive variances.
+
+```{r warning=FALSE}
+analyze.bv(popList,
+           cohorts = 'burnin_5_M') # first male generation selection was performed for
+
+```
+
+The higher accuracy for MKG due to a higher heritability explains the stronger gain for MKG.  
+    
+Selection always comes along with inbreeding. `kinship.development()` calculates average between and within individual kinship coefficients by generation:
+
+```{r}
+ temp <- kinship.development(popList,
+                    gen=1:11,
+                    display.cohort.name = TRUE)
+# average between individual relationship coefficient
+2*temp[,1]
+# average inbreeding coefficient
+2*temp[,2] - 1 
+
+```
+
+> Note that the burn in phase (random mating) led to only minor inbreeding, while the selection phase increased it much more. 
+
+### Exercise 5
+
+Use following coding section to analyze your population "ownPop". 
+
+```{r include=FALSE}
+ownPop4 <- ownPop3
+n_selection <- 6 # number of selecting generations
+for(i_selection in 1:n_selection){
+  ownPop4 <- breeding.diploid(ownPop4,
+                              # create 120 offfspring each year
+                              breeding.size = 120,
+                              # select 6 sires (10%) and 30 dams (50%)
+                              selection.size = c(6,30),
+                              # select based on EBVs
+                              selection.criteria = 'bve',
+                              # estimate breeding values
+                              bve = TRUE,
+                              # use all previous generations 
+                              bve.gen = c(1:(n_burnin + i_selection)),
+                              # add phenotypes for new females, if not yet present
+                              new.bv.observation = "non_obs_f",
+                              sigma.e = c(0.5,2),
+                              name.cohort = paste0('offspring_',i_selection),
+                              verbose = FALSE)
+}
+
+```
+
+
+```{r res-setup}
+nburnin <- 3
+n_selection <- 6
+ownPop <- ownPop4
+```
+
 
 
 ```{r res, exercise=TRUE, exercise.lines = 12}
@@ -492,9 +625,3 @@ kinship.development(popList,
 ```
 
 
-```{r res-solution}
-
-
-
-
-```
