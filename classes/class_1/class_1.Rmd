@@ -31,7 +31,8 @@ Following code installs some packages which are needed packages for the installa
 
 ```{r install_packages, echo=TRUE}
 pck <- c('devtools','stringr')
-install.packages(pck[!pck %in% rownames(installed.packages())])
+install.packages(pck[!pck %in% rownames(installed.packages())],
+                 repos="https://cloud.r-project.org")
 invisible(lapply(pck,library,character.only = TRUE, quietly = TRUE))
 ```
 
@@ -211,7 +212,7 @@ popList <- creating.trait(population = popList,
                           var.target = c(MKG = 25^2, FP = 0.5^2),
                           # indices of correlated traits
                           shuffle.traits = c(1,2),
-                          # genetic correlation (0.5) matrix
+                          # genetic correlation (0.25) matrix
                           shuffle.cor = matrix(c(1,.25,
                                                  .25,1),2,2),
                           # residual correlation (0) matrix
