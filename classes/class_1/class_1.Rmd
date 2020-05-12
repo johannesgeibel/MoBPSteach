@@ -55,7 +55,7 @@ install.packages(pck, repos = NULL, type = 'source')
 Finally, we install the newest `MoBPS` version from GitHub.
 
 ```{r install_MoBPS, echo=TRUE, exercise=FALSE}
-devtools::install_github('tpook92/MoBPS/pkg')
+devtools::install_github('tpook92/MoBPS/development_version')
 library(MoBPS)
 ```
 
@@ -218,9 +218,7 @@ popList <- creating.trait(population = popList,
                                                  .25,1),2,2),
                           # residual correlation (0) matrix
                           new.residual.correlation = matrix(c(1,0,
-                                                            0,1),2,2),
-                          # remove previously generated traits.
-                          replace.traits = TRUE)
+                                                            0,1),2,2))
 summary(popList)
 
 ```
@@ -451,7 +449,7 @@ n_burnin <- 5
 n_selection <- 5 # number of selecting generations
 for(i_selection in 1:n_selection){
   popList <- breeding.diploid(popList,
-                              # create 100 calfes each year
+                              # create 100 calves each year
                               breeding.size = 100,
                               # select 5 bulls (10%) and all cows
                               selection.size = c(5,50),
