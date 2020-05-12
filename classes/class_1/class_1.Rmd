@@ -118,7 +118,7 @@ get.cohorts(popList, extended = TRUE)
 ```
 
 
-By now, all markers are located on one single chromosome with a default length of 5 Morgan (M) and a physical size of 5 kilo bases (kb). The number of chromosomes can be either changed by the parameter `chr.nr` which leads to the according number of 5M chromosomes with markers evenly distributed on chromosomes, or by directly supplying an vector with the intended lengths in M via `chromosome.length` (the number of markers per chromosome has to be specificed here).
+By now, all markers are located on one single chromosome with a default length of 5 Morgan (M) and a physical size of 5 kilo bases (kb). The number of chromosomes can be either changed by the parameter `chr.nr` which leads to the according number of 5M chromosomes with markers evenly distributed on chromosomes, or by directly supplying an vector with the intended lengths in M via `chromosome.length` (the number of markers per chromosome has to be specificed in this case).
 
 ```{r}
 temp <- creating.diploid(nindi =  50,
@@ -174,15 +174,15 @@ summary(ownPop)
 By now, our base population consists only of individuals with genomes. To simulate breeding programs, we need to additionally simulate phenotypic traits and the according genetic basis. We will start doing so by randomly drawing additive effects from a normal distribution with additive variance of $\sigma_{A;MKG}^2=25^2kg^2$ for 100 SNP which contribute to the trait milk yield [kg] (MKG) via the function `creating.trait()`. Note that it is also possible to directly simulate the trait in `creating.diploid()`.
 
 ```{r}
-popList <- creating.trait(population = popList,
+temp <- creating.trait(population = popList,
                           # name of trait
                           trait.name = 'MKG',
                           # number of additive effects
                           n.additive = 100,
                           # additive genetic target variance
                           var.target =  25^2)
-summary(popList)
-get.cohorts(popList)
+summary(temp)
+get.cohorts(temp)
 ```
 
 
@@ -400,7 +400,7 @@ $$h^2=\frac{\sigma^2_A}{\sigma^2_A + \sigma^2_E}$$
 
 $$\sigma^2_E=\frac{\sigma^2_A}{h^2} - \sigma^2_A = \frac{\sigma^2_A (1-h^2)}{h^2}$$
 
-If we assume heritabilities of 0.8 respectively 0.3 for both of our traits, $\sigma^2_{E;MKG}=156.25$ and $\sigma^2_{E;FP}=0.58$. As only female cows can give milk, we simulate the phenotypes for all not yet phenotyped females by the following code. Note that you have to set `sigma.e` only once, if you do not assume changes over the generations! sigma.e can also be automatically fitted by the use of the heritability parameter.
+If we assume heritabilities of 0.8 respectively 0.3 for both of our traits, $\sigma^2_{E;MKG}=156.25$ and $\sigma^2_{E;FP}=0.58$. As only female cows can give milk, we simulate the phenotypes for all not yet phenotyped females by the following code. Note that you have to set `sigma.e` only once, if you do not assume changes over the generations! `sigma.e` can also be automatically fitted by the use of the `heritability` parameter.
 
 ```{r eval=FALSE, include=FALSE}
 (25^2*(1-0.8))/0.8
