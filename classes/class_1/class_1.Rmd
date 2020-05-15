@@ -5,6 +5,11 @@ output:
     highlight: tango
 runtime: shiny_prerendered
 ---
+<!--
+Disclaimer:
+To run this tutorial, it is necessary to have the correct version of rtools installed on your computer. Please find the version of Rtools wich matches your R version at https://cran.r-project.org/bin/windows/Rtools/history.html . Additionally, you need to install the package learnr via install.packages('learnr'). All other dependencies will be installed when pressing the 'run document' button in RStudio. Do not try to run the code junks direktly from the markdown script, as this will not perform every step as intended!
+-->
+
 
 ```{r setup, include=FALSE}
 library(learnr)
